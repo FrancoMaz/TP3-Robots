@@ -1,8 +1,8 @@
-from flask import Flask
+from flask import Flask, jsonify
 import requests
-from result import Result
 
 app = Flask(__name__)
+
 
 @app.route('/search')
 def search():
@@ -10,9 +10,12 @@ def search():
     url = 'https://api.mercadolibre.com/sites/MLA/search?q=:' + query
     x = requests.get(url).json()
     results = x.get("results")
-    first_result = Result(results[0].get("thumbnail"), results[0].get("permalink"), query)
-    print(first_result.__str__())
-    return first_result.__str__()
+    results_list = []
+    for x in range(20):
+        results_list.append({
+            "Thumbnail": results[x].get("thumbnail"),
+            "Link": results[x].get("permalink")})
+    return jsonify({"Query": query, "Results": results_list})
 
 
 if __name__ == '__main__':
