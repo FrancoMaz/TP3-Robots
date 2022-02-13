@@ -18,9 +18,6 @@ def search():
     print(stdout)
     return stdout
 
-    # TODO: correr el script de YOLO con la imagen, y del output tomar el valor que iría en la variable query
-    # python detect.py --weights best_materiales.pt --img-size 416 --conf 0.4 --source images
-
 
 """
     query = 'mate'
