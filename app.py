@@ -12,10 +12,8 @@ def search():
     results = x.get("results")
     results_list = []
     for x in range(20):
-        results_list.append({
-            "Thumbnail": results[x].get("thumbnail"),
-            "Link": results[x].get("permalink")})
-    return jsonify({"Query": query, "Results": results_list})
+        results_list.append(results[x])
+    return jsonify({"query": query, "link": results_list[0].get("permalink")})
 
 
 if __name__ == '__main__':
