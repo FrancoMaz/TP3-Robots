@@ -1,11 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import requests
 
 app = Flask(__name__)
 
 
-@app.route('/search')
+@app.route('/search', methods=['POST'])
 def search():
+    data = request.json
+    print(data)
     query = 'mate'
     url = 'https://api.mercadolibre.com/sites/MLA/search?q=:' + query
     x = requests.get(url).json()
