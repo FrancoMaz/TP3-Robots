@@ -1,4 +1,3 @@
-import flask
 from flask import Flask, jsonify, redirect
 import requests
 import subprocess
@@ -14,7 +13,7 @@ def page_not_found(e):
 @app.route('/search')
 def search():
     # image = request.args.get('image')
-    image = "images/cartera.jpeg"
+    image = "images/snowboard.jpeg"
     mates = ['calabaza', 'madera', 'metal', 'plastico']
 
     coco128 = ['backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'snowboard',
