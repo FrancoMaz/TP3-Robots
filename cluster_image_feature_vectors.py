@@ -83,40 +83,38 @@ def cluster():
 
     named_nearest_neighbors = []
 
-    # Loops through all indexed items
-    for i in file_index_to_file_name.keys():
+    # Assigns master file_name, image feature vectors and product id values
+    master_file_name = "oso-peluche-2"
+    master_vector = "oso-peluche-2"
 
-        # Assigns master file_name, image feature vectors and product id values
-        master_file_name = file_index_to_file_name[i]
-        master_vector = file_index_to_file_vector[i]
+    # Calculates the nearest neighbors of the master item
+    index_master = list(file_index_to_file_name.keys())[list(file_index_to_file_name.values()).index(master_file_name)]
+    nearest_neighbors = t.get_nns_by_item(index_master, n_nearest_neighbors)
 
-        # Calculates the nearest neighbors of the master item
-        nearest_neighbors = t.get_nns_by_item(i, n_nearest_neighbors)
+    # Loops through the nearest neighbors of the master item
+    for j in nearest_neighbors:
+        print(j)
 
-        # Loops through the nearest neighbors of the master item
-        for j in nearest_neighbors:
-            print(j)
+        # Assigns file_name, image feature vectors and product id values of the similar item
+        neighbor_file_name = file_index_to_file_name[j]
+        neighbor_file_vector = file_index_to_file_vector[j]
 
-            # Assigns file_name, image feature vectors and product id values of the similar item
-            neighbor_file_name = file_index_to_file_name[j]
-            neighbor_file_vector = file_index_to_file_vector[j]
+        # Calculates the similarity score of the similar item
+        similarity = 1 - spatial.distance.cosine(file_index_to_file_vector[index_master], neighbor_file_vector)
+        rounded_similarity = int((similarity * 10000)) / 10000.0
 
-            # Calculates the similarity score of the similar item
-            similarity = 1 - spatial.distance.cosine(master_vector, neighbor_file_vector)
-            rounded_similarity = int((similarity * 10000)) / 10000.0
+        # Appends master product id with the similarity score
+        # and the product id of the similar items
+        named_nearest_neighbors.append({
+            'similarity': rounded_similarity,
+            'master_name': master_file_name,
+            'similar_name': neighbor_file_name})
 
-            # Appends master product id with the similarity score
-            # and the product id of the similar items
-            named_nearest_neighbors.append({
-                'similarity': rounded_similarity,
-                'master_name': master_file_name,
-                'similar_name': neighbor_file_name})
-
-        print("---------------------------------")
-        print("Similarity index       : %s" % i)
-        print("Master Image file name : %s" % master_file_name)
-        print("Nearest Neighbors.     : %s" % nearest_neighbors)
-        print("--- %.2f minutes passed ---------" % ((time.time() - start_time) / 60))
+    print("---------------------------------")
+    print("Similarity index       : %s" % index_master)
+    print("Master Image file name : %s" % master_file_name)
+    print("Nearest Neighbors.     : %s" % nearest_neighbors)
+    print("--- %.2f minutes passed ---------" % ((time.time() - start_time) / 60))
 
     print("Step.2 - Similarity score calculation - Finished ")
 
@@ -126,6 +124,8 @@ def cluster():
 
     print("Step.3 - Data stored in 'nearest_neighbors.json' file ")
     print("--- Process completed in %.2f minutes ---------" % ((time.time() - start_time) / 60))
+
+    return named_nearest_neighbors
 
 
 cluster()
