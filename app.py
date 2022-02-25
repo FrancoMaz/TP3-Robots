@@ -45,7 +45,7 @@ def search():
     # imgdata = base64.b64decode(image_received)
     image_path = "images/uploads"
 
-    filename = image_path + "/image.jpg"
+    filename = image_path + "/image.jpeg"
 
     with open(filename, 'wb') as f:
         f.write(image_received)
