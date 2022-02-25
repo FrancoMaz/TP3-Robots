@@ -54,11 +54,13 @@ def cluster():
     trees = 10000
 
     # Reads all file names which stores feature vectors
-    allfiles = glob.glob('feature-vectors/*.npz')
+    all_uploads = glob.glob('feature-vectors/uploads/*')
+    all_results = glob.glob('feature-vectors/results/*')
+    all_files = all_uploads + all_results
 
     t = AnnoyIndex(dims, metric='angular')
 
-    for file_index, i in enumerate(allfiles):
+    for file_index, i in enumerate(all_files):
         # Reads feature vectors and assigns them into the file_vector
         file_vector = np.loadtxt(i)
 
@@ -84,10 +86,10 @@ def cluster():
     named_nearest_neighbors = []
 
     # Assigns master file_name, image feature vectors and product id values
-    master_file_name = "oso-peluche-2"
-    master_vector = "oso-peluche-2"
+    master_file_name = os.path.basename(all_uploads[0]).split('.')[0]
 
     # Calculates the nearest neighbors of the master item
+    print(file_index_to_file_name.__str__())
     index_master = list(file_index_to_file_name.keys())[list(file_index_to_file_name.values()).index(master_file_name)]
     nearest_neighbors = t.get_nns_by_item(index_master, n_nearest_neighbors)
 
@@ -126,6 +128,3 @@ def cluster():
     print("--- Process completed in %.2f minutes ---------" % ((time.time() - start_time) / 60))
 
     return named_nearest_neighbors
-
-
-cluster()

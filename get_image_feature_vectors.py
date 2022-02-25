@@ -59,7 +59,7 @@ def get_image_feature_vectors():
     print("---------------------------------")
 
     # Definition of module with using tfhub.dev handle
-    module_handle = "https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/feature_vector/4"
+    module_handle = "https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/feature_vector/5"
 
     # Load the module
     module = hub.load(module_handle)
@@ -72,36 +72,34 @@ def get_image_feature_vectors():
     print("Step.2 of 2 - Generating Feature Vectors -  Started at %s" % time.ctime())
 
     # Loops through all images in a local folder
-    for filename in glob.glob('images/*.jpeg'):
-        i = i + 1
+    for folder in ['uploads', 'results']:
+        for filename in glob.glob('images/' + folder + '/*'):
+            i = i + 1
 
-        print("-----------------------------------------------------------------------------------------")
-        print("Image count                     :%s" % i)
-        print("Image in process is             :%s" % filename)
+            print("-----------------------------------------------------------------------------------------")
+            print("Image count                     :%s" % i)
+            print("Image in process is             :%s" % filename)
 
-        # Loads and pre-process the image
-        img = load_img(filename)
+            # Loads and pre-process the image
+            img = load_img(filename)
 
-        # Calculate the image feature vector of the img
-        features = module(img)
+            # Calculate the image feature vector of the img
+            features = module(img)
 
-        # Remove single-dimensional entries from the 'features' array
-        feature_set = np.squeeze(features)
+            # Remove single-dimensional entries from the 'features' array
+            feature_set = np.squeeze(features)
 
-        # Saves the image feature vectors into a file for later use
+            # Saves the image feature vectors into a file for later use
 
-        outfile_name = os.path.basename(filename).split('.')[0] + ".npz"
-        out_path = os.path.join('feature-vectors/', outfile_name)
+            outfile_name = os.path.basename(filename).split('.')[0] + ".npz"
+            out_path = os.path.join('feature-vectors/' + folder + '/', outfile_name)
 
-        # Saves the 'feature_set' to a text file
-        np.savetxt(out_path, feature_set, delimiter=',')
+            # Saves the 'feature_set' to a text file
+            np.savetxt(out_path, feature_set, delimiter=',')
 
-        print("Image feature vector saved to   :%s" % out_path)
+            print("Image feature vector saved to   :%s" % out_path)
 
     print("---------------------------------")
     print("Step.2 of 2 - Generating Feature Vectors - Completed at %s" % time.ctime())
     print("--- %.2f minutes passed ---------" % ((time.time() - start_time) / 60))
     print("--- %s images processed ---------" % i)
-
-
-get_image_feature_vectors()
