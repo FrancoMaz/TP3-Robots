@@ -1,6 +1,13 @@
+import glob
+import os
+import shutil
+
 from flask import Flask, jsonify, redirect
 import requests
 import subprocess
+import urllib.request
+from get_image_feature_vectors import get_image_feature_vectors
+from cluster_image_feature_vectors import cluster
 
 app = Flask(__name__)
 
@@ -12,8 +19,19 @@ def page_not_found(e):
 
 @app.route('/search')
 def search():
+
+    shutil.rmtree('feature-vectors/results')
+    shutil.rmtree('feature-vectors/uploads')
+    shutil.rmtree('images/results')
+    shutil.rmtree('yolo/runs/detect')
+
+    os.makedirs('images/results', exist_ok=True)
+    os.makedirs('feature-vectors/uploads', exist_ok=True)
+    os.makedirs('feature-vectors/results', exist_ok=True)
+
     # image = request.args.get('image')
-    image = "images/snowboard.jpeg"
+    image = "images/uploads"
+    image_filename = os.path.basename(glob.glob(image + '/*')[0]).split('.')[0]
     mates = ['calabaza', 'madera', 'metal', 'plastico']
 
     coco128 = ['backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'snowboard',
@@ -82,11 +100,17 @@ def search():
     results_list = []
     for x in range(20):
         results_list.append(results[x])
+        urllib.request.urlretrieve(results[x].get("thumbnail"),
+                                   'images/results/test-' + x.__str__() + '.jpg')
 
-    # TODO: correr la otra red para detectar la imagen más similar y quedarnos
-    #  con results_list[x] siendo x la posición de ese resultado obtenido (campo thumbnail de la respuesta)
+    get_image_feature_vectors()
+    nearest_neighbours = cluster()
 
-    return jsonify({"query": query, "link": results_list[0].get("permalink")})
+    filtered = filter(lambda obj: obj['similar_name'] != image_filename, nearest_neighbours)
+    similar_filename = list(filtered)[0]['similar_name']
+    index_similar_filename = int(similar_filename.split('-')[1])
+
+    return jsonify({"query": query, "link": results_list[index_similar_filename].get("permalink")})
 
 
 if __name__ == '__main__':
