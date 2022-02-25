@@ -1,8 +1,9 @@
 import glob
 import os
 import shutil
+import base64
 
-from flask import Flask, jsonify, redirect
+from flask import Flask, jsonify, redirect, request
 import requests
 import subprocess
 import urllib.request
@@ -17,21 +18,30 @@ def page_not_found(e):
     return jsonify({"message": "No se encontro ningun objeto conocido en la imagen"})
 
 
-@app.route('/search')
+@app.route('/search', methods=['POST'])
 def search():
 
     shutil.rmtree('feature-vectors/results')
     shutil.rmtree('feature-vectors/uploads')
     shutil.rmtree('images/results')
+    shutil.rmtree('images/uploads')
     shutil.rmtree('yolo/runs/detect')
 
     os.makedirs('images/results', exist_ok=True)
+    os.makedirs('images/uploads', exist_ok=True)
     os.makedirs('feature-vectors/uploads', exist_ok=True)
     os.makedirs('feature-vectors/results', exist_ok=True)
 
-    # image = request.args.get('image')
-    image = "images/uploads"
-    image_filename = os.path.basename(glob.glob(image + '/*')[0]).split('.')[0]
+    image_received = request.get_json()['image']
+    imgdata = base64.b64decode(image_received)
+    image_path = "images/uploads"
+
+    filename = image_path + "/image.jpg"
+
+    with open(filename, 'wb') as f:
+        f.write(imgdata)
+
+    image_filename = os.path.basename(glob.glob(image_path + '/*')[0]).split('.')[0]
     mates = ['calabaza', 'madera', 'metal', 'plastico']
 
     coco128 = ['backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'snowboard',
@@ -67,7 +77,7 @@ def search():
 
     out = subprocess.Popen(['python3', 'yolo/detect.py',
                             '--weights', 'yolo/best_materiales.pt', '--img-size', '416',
-                            '--conf', '0.4', '--source', image],
+                            '--conf', '0.4', '--source', image_path],
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT)
 
