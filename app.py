@@ -2,6 +2,7 @@ import glob
 import os
 import shutil
 import base64
+from pathlib import Path
 
 from flask import Flask, jsonify, redirect, request
 import requests
@@ -20,12 +21,11 @@ def page_not_found(e):
 
 @app.route('/search', methods=['POST'])
 def search():
-
-    shutil.rmtree('feature-vectors/results')
-    shutil.rmtree('feature-vectors/uploads')
-    shutil.rmtree('images/results')
-    shutil.rmtree('images/uploads')
-    shutil.rmtree('yolo/runs/detect')
+    # shutil.rmtree('feature-vectors/results')
+    # shutil.rmtree('feature-vectors/uploads')
+    # shutil.rmtree('images/results')
+    # shutil.rmtree('images/uploads')
+    # shutil.rmtree('yolo/runs/detect')
 
     os.makedirs('images/results', exist_ok=True)
     os.makedirs('images/uploads', exist_ok=True)
@@ -35,11 +35,13 @@ def search():
     image_received = request.get_json()['image']
     imgdata = base64.b64decode(image_received)
     image_path = "images/uploads"
+    p = Path("image.jpeg")
+    p.write_bytes(imgdata)
 
-    filename = image_path + "/image.jpg"
+    # filename = image_path + "/image.jpg"
 
-    with open(filename, 'wb') as f:
-        f.write(imgdata)
+    # with open(filename, 'wb') as f:
+    # f.write(imgdata)
 
     image_filename = os.path.basename(glob.glob(image_path + '/*')[0]).split('.')[0]
     mates = ['calabaza', 'madera', 'metal', 'plastico']
@@ -91,7 +93,7 @@ def search():
     if query == '':
         out = subprocess.Popen(['python3', 'yolo/detect.py',
                                 '--weights', 'yolo/best_coco128.pt', '--img-size', '416',
-                                '--conf', '0.4', '--source', image],
+                                '--conf', '0.4', '--source', image_path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
 
