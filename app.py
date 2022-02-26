@@ -30,11 +30,11 @@ def page_not_found(e):
 
 @app.route('/search', methods=['POST'])
 def search():
-    # shutil.rmtree('feature-vectors/results')
-    # shutil.rmtree('feature-vectors/uploads')
-    # shutil.rmtree('images/results')
-    # shutil.rmtree('images/uploads')
-    # shutil.rmtree('yolo/runs/detect')
+
+    shutil.rmtree('feature-vectors/results', ignore_errors=True)
+    shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
+    shutil.rmtree('images/results', ignore_errors=True)
+    shutil.rmtree('yolo/runs/detect', ignore_errors=True)
 
     os.makedirs('images/results', exist_ok=True)
     os.makedirs('images/uploads', exist_ok=True)
@@ -129,7 +129,9 @@ def search():
     similar_filename = list(filtered)[0]['similar_name']
     index_similar_filename = int(similar_filename.split('-')[1])
 
-    return jsonify({"query": query, "link": results_list[index_similar_filename].get("permalink")})
+    return jsonify({"query": query,
+                    "link": results_list[index_similar_filename].get("permalink"),
+                    "image": results_list[index_similar_filename].get("thumbnail")})
 
 
 if __name__ == '__main__':

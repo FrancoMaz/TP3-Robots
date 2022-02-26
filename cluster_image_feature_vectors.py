@@ -119,6 +119,11 @@ def cluster():
     print("--- %.2f minutes passed ---------" % ((time.time() - start_time) / 60))
 
     print("Step.2 - Similarity score calculation - Finished ")
+    # Writes the 'named_nearest_neighbors' to a json file
+    with open('nearest_neighbors.json', 'w') as out:
+        json.dump(named_nearest_neighbors, out)
+
+    print("Step.3 - Data stored in 'nearest_neighbors.json' file ")
 
     # Writes the 'named_nearest_neighbors' to a json file
     with open('nearest_neighbors.json', 'w') as out:
