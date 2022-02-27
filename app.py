@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 
 def stringToRGB(base64_string):
-    imgdata = base64.b64decode(str(base64_string))
+    imgdata = base64.urlsafe_b64decode(base64_string)
     image = Image.open(io.BytesIO(imgdata))
     return cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
 
@@ -30,7 +30,6 @@ def page_not_found(e):
 
 @app.route('/search', methods=['POST'])
 def search():
-
     shutil.rmtree('feature-vectors/results', ignore_errors=True)
     shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
     shutil.rmtree('images/results', ignore_errors=True)
@@ -41,14 +40,15 @@ def search():
     os.makedirs('feature-vectors/uploads', exist_ok=True)
     os.makedirs('feature-vectors/results', exist_ok=True)
 
-    image_received = stringToRGB(request.get_json()['image'])
+    # image_received = stringToRGB(request.get_json()['image'])
     # imgdata = base64.b64decode(image_received)
     image_path = "images/uploads"
+    print("Llega")
 
-    filename = image_path + "/image.jpeg"
-
-    with open(filename, 'wb') as f:
-        f.write(image_received)
+    image_received = request.files['image']
+    print("Llega 2")
+    image_received.save(os.path.join(image_path, 'image.jpg'))
+    print("Llega 3")
 
     image_filename = os.path.basename(glob.glob(image_path + '/*')[0]).split('.')[0]
     mates = ['calabaza', 'madera', 'metal', 'plastico']
