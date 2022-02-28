@@ -2,7 +2,7 @@ import glob
 import os
 import shutil
 
-from flask import Flask, jsonify, redirect, request, make_response
+from flask import Flask, jsonify, request, make_response
 import requests
 import subprocess
 import urllib.request
