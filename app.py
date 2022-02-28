@@ -2,8 +2,7 @@ import glob
 import os
 import shutil
 
-from flask import Flask, jsonify, redirect, request
-from flask_cors import CORS
+from flask import Flask, jsonify, redirect, request, make_response
 import requests
 import subprocess
 import urllib.request
@@ -11,16 +10,11 @@ from get_image_feature_vectors import get_image_feature_vectors
 from cluster_image_feature_vectors import cluster
 
 app = Flask(__name__)
-CORS(app)
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return jsonify({"message": "No se encontro ningun objeto conocido en la imagen"})
 
 
 @app.route('/search', methods=['POST'])
 def search():
+    print("1")
     shutil.rmtree('feature-vectors/results', ignore_errors=True)
     shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
     shutil.rmtree('images/uploads', ignore_errors=True)
@@ -36,6 +30,7 @@ def search():
 
     image_received = request.files['image']
     image_received.save(os.path.join(image_path, 'image.jpg'))
+    print(2)
 
     image_filename = os.path.basename(glob.glob(image_path + '/*')[0]).split('.')[0]
     mates = ['calabaza', 'madera', 'metal', 'plastico']
@@ -97,12 +92,16 @@ def search():
                 query = values_for_query[c]
                 break
 
+    print(3)
+
     if query == '':
-        return redirect('/404')
+        return make_response({"message": "No se pudo detectar ningun objeto"}, 404)
 
     url = 'https://api.mercadolibre.com/sites/MLA/search?q=:' + query
     x = requests.get(url).json()
     results = x.get("results")
+    if len(results) == 0:
+        return make_response({"message": "No se encontraron resultados para la busqueda " + query}, 404)
     results_list = []
     for x in range(20):
         results_list.append(results[x])
