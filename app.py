@@ -1,8 +1,12 @@
 import glob
 import os
 import shutil
+import base64
+from PIL import Image
+import numpy as np
+import io
 
-from flask import Flask, jsonify, redirect
+from flask import Flask, jsonify, redirect, request
 import requests
 import subprocess
 import urllib.request
@@ -17,21 +21,25 @@ def page_not_found(e):
     return jsonify({"message": "No se encontro ningun objeto conocido en la imagen"})
 
 
-@app.route('/search')
+@app.route('/search', methods=['POST'])
 def search():
-
     shutil.rmtree('feature-vectors/results', ignore_errors=True)
     shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
+    shutil.rmtree('images/uploads', ignore_errors=True)
     shutil.rmtree('images/results', ignore_errors=True)
     shutil.rmtree('yolo/runs/detect', ignore_errors=True)
 
     os.makedirs('images/results', exist_ok=True)
+    os.makedirs('images/uploads', exist_ok=True)
     os.makedirs('feature-vectors/uploads', exist_ok=True)
     os.makedirs('feature-vectors/results', exist_ok=True)
 
-    # image = request.args.get('image')
-    image = "images/uploads"
-    image_filename = os.path.basename(glob.glob(image + '/*')[0]).split('.')[0]
+    image_path = "images/uploads"
+
+    image_received = request.files['image']
+    image_received.save(os.path.join(image_path, 'image.jpg'))
+
+    image_filename = os.path.basename(glob.glob(image_path + '/*')[0]).split('.')[0]
     mates = ['calabaza', 'madera', 'metal', 'plastico']
 
     coco128 = ['backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'snowboard',
@@ -67,7 +75,7 @@ def search():
 
     out = subprocess.Popen(['python3', 'yolo/detect.py',
                             '--weights', 'yolo/best_materiales.pt', '--img-size', '416',
-                            '--conf', '0.4', '--source', image],
+                            '--conf', '0.4', '--source', image_path],
                            stdout=subprocess.PIPE,
                            stderr=subprocess.STDOUT)
 
@@ -81,7 +89,7 @@ def search():
     if query == '':
         out = subprocess.Popen(['python3', 'yolo/detect.py',
                                 '--weights', 'yolo/best_coco128.pt', '--img-size', '416',
-                                '--conf', '0.4', '--source', image],
+                                '--conf', '0.4', '--source', image_path],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT)
 
