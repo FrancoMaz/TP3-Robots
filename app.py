@@ -12,15 +12,8 @@ import subprocess
 import urllib.request
 from get_image_feature_vectors import get_image_feature_vectors
 from cluster_image_feature_vectors import cluster
-import cv2
 
 app = Flask(__name__)
-
-
-def stringToRGB(base64_string):
-    imgdata = base64.urlsafe_b64decode(base64_string)
-    image = Image.open(io.BytesIO(imgdata))
-    return cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
 
 
 @app.errorhandler(404)
@@ -32,6 +25,7 @@ def page_not_found(e):
 def search():
     shutil.rmtree('feature-vectors/results', ignore_errors=True)
     shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
+    shutil.rmtree('images/uploads', ignore_errors=True)
     shutil.rmtree('images/results', ignore_errors=True)
     shutil.rmtree('yolo/runs/detect', ignore_errors=True)
 
@@ -40,15 +34,10 @@ def search():
     os.makedirs('feature-vectors/uploads', exist_ok=True)
     os.makedirs('feature-vectors/results', exist_ok=True)
 
-    # image_received = stringToRGB(request.get_json()['image'])
-    # imgdata = base64.b64decode(image_received)
     image_path = "images/uploads"
-    print("Llega")
 
     image_received = request.files['image']
-    print("Llega 2")
     image_received.save(os.path.join(image_path, 'image.jpg'))
-    print("Llega 3")
 
     image_filename = os.path.basename(glob.glob(image_path + '/*')[0]).split('.')[0]
     mates = ['calabaza', 'madera', 'metal', 'plastico']
