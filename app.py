@@ -1,12 +1,9 @@
 import glob
 import os
 import shutil
-import base64
-from PIL import Image
-import numpy as np
-import io
 
 from flask import Flask, jsonify, redirect, request
+from flask_cors import CORS
 import requests
 import subprocess
 import urllib.request
@@ -14,6 +11,7 @@ from get_image_feature_vectors import get_image_feature_vectors
 from cluster_image_feature_vectors import cluster
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.errorhandler(404)
