@@ -14,7 +14,6 @@ app = Flask(__name__)
 
 @app.route('/search', methods=['POST'])
 def search():
-    print("1")
     shutil.rmtree('feature-vectors/results', ignore_errors=True)
     shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
     shutil.rmtree('images/uploads', ignore_errors=True)
@@ -30,7 +29,6 @@ def search():
 
     image_received = request.files['image']
     image_received.save(os.path.join(image_path, 'image.jpg'))
-    print(2)
 
     image_filename = os.path.basename(glob.glob(image_path + '/*')[0]).split('.')[0]
     mates = ['calabaza', 'madera', 'metal', 'plastico']
@@ -91,8 +89,6 @@ def search():
             if ' ' + c in stdout.__str__():
                 query = values_for_query[c]
                 break
-
-    print(3)
 
     if query == '':
         return make_response({"message": "No se pudo detectar ningun objeto"}, 404)
