@@ -4,19 +4,18 @@ import shutil
 
 from flask import Flask, jsonify, request, make_response
 import requests
-import subprocess
 import urllib.request
 from get_image_feature_vectors import get_image_feature_vectors
 from cluster_image_feature_vectors import cluster
 from yolo.detect import run
 from yolo.detect import check_requirements
-from yolo.detect import parse_opt
 
 app = Flask(__name__)
 
 
 @app.route('/search', methods=['POST'])
 def search():
+    print("Llega")
     shutil.rmtree('feature-vectors/results', ignore_errors=True)
     shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
     shutil.rmtree('images/uploads', ignore_errors=True)
@@ -69,7 +68,7 @@ def search():
     }
 
     check_requirements(exclude=('tensorboard', 'thop'))
-    out = run(weights='yolo/best_materiales.pt', imgsz='416', conf_thres='0.4', source=image_path)
+    out = run(weights='yolo/best_materiales.pt', imgsz=(416, 416), conf_thres=0.4, source=image_path)
 
     query = ''
     for m in mates:
@@ -78,7 +77,7 @@ def search():
             break
 
     if query == '':
-        out = run(weights='yolo/best_coco128.pt', imgsz='416', conf_thres='0.4', source=image_path)
+        out = run(weights='yolo/best_coco128.pt', imgsz=(416, 416), conf_thres=0.4, source=image_path)
 
         for c in coco128:
             if ' ' + c in out:
