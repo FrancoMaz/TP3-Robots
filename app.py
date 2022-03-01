@@ -15,7 +15,6 @@ app = Flask(__name__)
 
 @app.route('/search', methods=['POST'])
 def search():
-    print("Llega")
     shutil.rmtree('feature-vectors/results', ignore_errors=True)
     shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
     shutil.rmtree('images/uploads', ignore_errors=True)
