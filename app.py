@@ -8,6 +8,9 @@ import subprocess
 import urllib.request
 from get_image_feature_vectors import get_image_feature_vectors
 from cluster_image_feature_vectors import cluster
+from yolo.detect import run
+from yolo.detect import check_requirements
+from yolo.detect import parse_opt
 
 app = Flask(__name__)
 
@@ -65,29 +68,20 @@ def search():
         "hair drier": "secador de pelo"
     }
 
-    out = subprocess.Popen(['python3', 'yolo/detect.py',
-                            '--weights', 'yolo/best_materiales.pt', '--img-size', '416',
-                            '--conf', '0.4', '--source', image_path],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT)
+    check_requirements(exclude=('tensorboard', 'thop'))
+    out = run(weights='yolo/best_materiales.pt', imgsz='416', conf_thres='0.4', source=image_path)
 
-    stdout, stderr = out.communicate()
     query = ''
     for m in mates:
-        if ' ' + m in stdout.__str__():
+        if ' ' + m in out:
             query = values_for_query[m]
             break
 
     if query == '':
-        out = subprocess.Popen(['python3', 'yolo/detect.py',
-                                '--weights', 'yolo/best_coco128.pt', '--img-size', '416',
-                                '--conf', '0.4', '--source', image_path],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT)
+        out = run(weights='yolo/best_coco128.pt', imgsz='416', conf_thres='0.4', source=image_path)
 
-        stdout, stderr = out.communicate()
         for c in coco128:
-            if ' ' + c in stdout.__str__():
+            if ' ' + c in out:
                 query = values_for_query[c]
                 break
 
