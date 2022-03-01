@@ -80,6 +80,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://'))
     webcam = source.isnumeric() or source.endswith('.txt') or (is_url and not is_file)
+    output = ""
     if is_url and is_file:
         source = check_file(source)  # download
 
@@ -202,6 +203,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
 
         # Print time (inference-only)
         LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
+        output += s
 
     # Print results
     t = tuple(x / seen * 1E3 for x in dt)  # speeds per image
@@ -211,6 +213,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
+    return output
 
 
 def parse_opt():

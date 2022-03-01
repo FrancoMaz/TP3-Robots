@@ -4,10 +4,11 @@ import shutil
 
 from flask import Flask, jsonify, request, make_response
 import requests
-import subprocess
 import urllib.request
 from get_image_feature_vectors import get_image_feature_vectors
 from cluster_image_feature_vectors import cluster
+from yolo.detect import run
+from yolo.detect import check_requirements
 
 app = Flask(__name__)
 
@@ -65,40 +66,31 @@ def search():
         "hair drier": "secador de pelo"
     }
 
-    out = subprocess.Popen(['python3', 'yolo/detect.py',
-                            '--weights', 'yolo/best_materiales.pt', '--img-size', '416',
-                            '--conf', '0.4', '--source', image_path],
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.STDOUT)
+    check_requirements(exclude=('tensorboard', 'thop'))
+    out = run(weights='yolo/best_materiales.pt', imgsz=(416, 416), conf_thres=0.4, source=image_path)
 
-    stdout, stderr = out.communicate()
     query = ''
     for m in mates:
-        if ' ' + m in stdout.__str__():
+        if ' ' + m in out:
             query = values_for_query[m]
             break
 
     if query == '':
-        out = subprocess.Popen(['python3', 'yolo/detect.py',
-                                '--weights', 'yolo/best_coco128.pt', '--img-size', '416',
-                                '--conf', '0.4', '--source', image_path],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT)
+        out = run(weights='yolo/best_coco128.pt', imgsz=(416, 416), conf_thres=0.4, source=image_path)
 
-        stdout, stderr = out.communicate()
         for c in coco128:
-            if ' ' + c in stdout.__str__():
+            if ' ' + c in out:
                 query = values_for_query[c]
                 break
 
     if query == '':
-        return make_response({"message": "No se pudo detectar ningun objeto"}, 404)
+        return make_response(jsonify({"message": "No se pudo detectar ningun objeto"}), 404)
 
     url = 'https://api.mercadolibre.com/sites/MLA/search?q=:' + query
     x = requests.get(url).json()
     results = x.get("results")
     if len(results) == 0:
-        return make_response({"message": "No se encontraron resultados para la busqueda " + query}, 404)
+        return make_response(jsonify({"message": "No se encontraron resultados para la busqueda " + query}), 404)
     results_list = []
     for x in range(20):
         results_list.append(results[x])
