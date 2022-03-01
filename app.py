@@ -18,12 +18,13 @@ def search():
     shutil.rmtree('feature-vectors/uploads', ignore_errors=True)
     shutil.rmtree('images/uploads', ignore_errors=True)
     shutil.rmtree('images/results', ignore_errors=True)
-    shutil.rmtree('yolo/runs/detect', ignore_errors=True)
+    shutil.rmtree('yolo/runs', ignore_errors=True)
 
     os.makedirs('images/results', exist_ok=True)
     os.makedirs('images/uploads', exist_ok=True)
     os.makedirs('feature-vectors/uploads', exist_ok=True)
     os.makedirs('feature-vectors/results', exist_ok=True)
+    os.makedirs('yolo/runs/detect', exist_ok=True)
 
     image_path = "images/uploads"
 
