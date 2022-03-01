@@ -85,13 +85,13 @@ def search():
                 break
 
     if query == '':
-        return make_response({"message": "No se pudo detectar ningun objeto"}, 404)
+        return make_response(jsonify({"message": "No se pudo detectar ningun objeto"}), 404)
 
     url = 'https://api.mercadolibre.com/sites/MLA/search?q=:' + query
     x = requests.get(url).json()
     results = x.get("results")
     if len(results) == 0:
-        return make_response({"message": "No se encontraron resultados para la busqueda " + query}, 404)
+        return make_response(jsonify({"message": "No se encontraron resultados para la busqueda " + query}), 404)
     results_list = []
     for x in range(20):
         results_list.append(results[x])
